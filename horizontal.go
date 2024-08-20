@@ -1,79 +1,47 @@
 package tree2html
 
-import (
-	"io"
-)
+func (t *Tree) HTable() (tb Table) {
+	maxDepth := MaxDepth(t)
 
-type HTable struct {
-	Rows     [][]*Tree
-	maxDepth int
-}
+	var (
+		firsts []*Tree
+		ri     int
+	)
 
-func (t *HTable) WriteTo(w io.Writer) (n int64, err error) {
-	return t.Write(&DefaultWriter{Writer: w})
-}
+	for t != nil {
+		firsts, t = PopFirsts(t)
+		var (
+			endCell = firsts[len(firsts)-1]
+			row     = make([]*Cell, len(firsts)+maxDepth-endCell.depth)
+			i       int
+		)
 
-func (t *HTable) Write(w Writer) (n int64, err error) {
-	var n2 int64
-
-	for _, row := range t.Rows {
-		n2, err = w.OpenRow()
-		n += n2
-		if err != nil {
-			return
+		for ; i < len(firsts); i++ {
+			col := firsts[i]
+			row[i] = &Cell{Node: col, Rowspan: col.leafCount, Row: ri, Col: i}
 		}
 
-		for _, col := range row {
-			n2, err = WriteCell(w, col, col.leafCount, 0)
-			n += n2
-			if err != nil {
-				return
-			}
+		for ; i < len(row); i++ {
+			row[i] = &Cell{Row: ri, Col: i}
 		}
 
-		for i := 0; i < t.maxDepth-row[len(row)-1].depth; i++ {
-			n2, err = WriteCell(w, nil, 0, 0)
-			n += n2
-			if err != nil {
-				return
-			}
-		}
-
-		n2, err = w.CloseRow()
-		n += n2
-		if err != nil {
-			return
-		}
+		tb = append(tb, row)
 	}
 	return
 }
 
-func NewHTable(tree *Tree) (t *HTable) {
-	t = &HTable{
-		maxDepth: MaxDepth(tree),
-	}
-	tree = tree.DeepCopy()
-
-	var firsts []*Tree
-	for tree != nil {
-		firsts, tree = tree.PopFirsts()
-		t.Rows = append(t.Rows, firsts)
-	}
+func PopFirsts(t *Tree) (firsts []*Tree, dot *Tree) {
+	dot = popFirsts(t, &firsts)
 	return
 }
 
-func (t *Tree) PopFirsts() (firsts []*Tree, dot *Tree) {
-	dot = t.popFirsts(&firsts)
-	return
-}
-
-func (t *Tree) popFirsts(firsts *[]*Tree) (dot *Tree) {
+func popFirsts(t *Tree, firsts *[]*Tree) (dot *Tree) {
 	if t.parent != nil {
 		*firsts = append(*firsts, t)
 	}
 
 	if len(t.Children) > 0 {
-		dot = t.Children[0].popFirsts(firsts)
+		dot = popFirsts(t.Children[0], firsts)
 	} else {
 		dot = Next(t)
 		t.parent.Children = t.parent.Children[1:]

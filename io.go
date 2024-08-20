@@ -46,14 +46,13 @@ func (w *DefaultWriter) OpenCell(t *Tree, rowspan, colspan int) (int64, error) {
 	}
 	cs := ""
 	if colspan > 1 {
-		cs = fmt.Sprintf(" colspan='%d'", colspan)
+		cs = fmt.Sprintf(` colspan="%d"`, colspan)
 	}
 	rs := ""
 	if rowspan > 1 {
-		rs = fmt.Sprintf(" rowspan='%d'", rowspan)
+		rs = fmt.Sprintf(` rowspan="%d"`, rowspan)
 	}
-	depth := fmt.Sprintf(" data-depth='%d'", t.depth)
-	i, err := fmt.Fprintf(w, "<td%s%s%s>", cs, rs, depth)
+	i, err := fmt.Fprintf(w, "<td%s%s>", cs, rs)
 	return int64(i), err
 }
 
@@ -67,16 +66,16 @@ func (w *DefaultWriter) CellValue(data any) (int64, error) {
 	return int64(i), err
 }
 
-func WriteCell(w Writer, col *Tree, rowspan, colspan int) (n int64, err error) {
+func WriteCell(w Writer, c *Cell) (n int64, err error) {
 	var n2 int64
-	n2, err = w.OpenCell(col, rowspan, colspan)
+	n2, err = w.OpenCell(c.Node, c.Rowspan, c.Colspan)
 	n += n2
 	if err != nil {
 		return
 	}
 
-	if col != nil {
-		n2, err = w.CellValue(col.Value)
+	if c.Node != nil {
+		n2, err = w.CellValue(c.Node.Value)
 		n += n2
 		if err != nil {
 			return

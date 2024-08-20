@@ -69,14 +69,16 @@ func write(f *os.File, tree *tree2html.Tree) {
 		t.Value = buildLabel(append(p[1:], t))
 	})
 
+	// Vertical
 	f.WriteString("<p>Vertical</p>\n")
 	f.WriteString("<table border=\"1\"><tbody>\n")
-	tree2html.NewVTable(tree).WriteTo(f)
+	tree.VTable().WriteTo(f)
 	f.WriteString("</tbody></table>\n")
 
+	// Horizontal
 	f.WriteString("<p>Horizontal</p>\n")
 	f.WriteString("<table border=\"1\"><tbody>\n")
-	tree2html.NewHTable(tree).WriteTo(f)
+	tree.HTable().WriteTo(f)
 	f.WriteString("</tbody></table>\n")
 	f.WriteString("<hr />\n")
 }
