@@ -1,18 +1,3 @@
-# tree2html
-
-Transforms Binary Tree (BTree) structure to HTML Table vertical and horizontal directions.
-
-## Installation
-
-```bash
-go get github.com/moisespsena-go/tree2html
-```
-
-## Examples
-
-See to [Example diretory](./example) for more examples.
-
-```go
 package main
 
 import (
@@ -103,4 +88,3 @@ func buildLabel(t []*tree2html.Tree) string {
 	}
 	return strings.Join(indexes, ".")
 }
-```
