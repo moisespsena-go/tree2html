@@ -3,13 +3,13 @@ package tree2html
 type Tree struct {
 	parent    *Tree
 	index     int
-	Value     string
+	Value     any
 	Children  []*Tree
 	leafCount int
 	depth     int
 }
 
-func New(val string, children ...*Tree) *Tree {
+func New(val any, children ...*Tree) *Tree {
 	return &Tree{Value: val, Children: children}
 }
 
