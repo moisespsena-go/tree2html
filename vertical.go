@@ -67,7 +67,7 @@ func (t *VTable) buildCells(tree *Tree, row, col, rowsLeft int) []*VCell {
 }
 
 func (t *VTable) WriteTo(w io.Writer) (n int64, err error) {
-	return t.Write(&DefaultWriter{Writer: w})
+	return t.Write(NewDefaultWriter(w))
 }
 
 func (t *VTable) Write(w Writer) (n int64, err error) {

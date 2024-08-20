@@ -17,6 +17,16 @@ type Writer interface {
 
 type DefaultWriter struct {
 	io.Writer
+	valueWriter func(w io.Writer, node *Tree) (n int64, err error)
+}
+
+func NewDefaultWriter(writer io.Writer) *DefaultWriter {
+	return &DefaultWriter{Writer: writer, valueWriter: defaultValueWriter}
+}
+
+func (w *DefaultWriter) SetValueWriter(valueWriter func(w io.Writer, node *Tree) (n int64, err error)) *DefaultWriter {
+	w.valueWriter = valueWriter
+	return w
 }
 
 func (w *DefaultWriter) OpenRow() (int64, error) {
@@ -76,4 +86,9 @@ func WriteCell(w Writer, col *Tree, rowspan, colspan int) (n int64, err error) {
 	n2, err = w.CloseCell()
 	n += n2
 	return
+}
+
+func defaultValueWriter(w io.Writer, t *Tree) (n int64, err error) {
+	i, err := fmt.Fprint(w, t.Value)
+	return int64(i), err
 }
