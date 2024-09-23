@@ -26,3 +26,7 @@ func maxDepth(t *Tree, d int, dst *int) {
 		*dst = d
 	}
 }
+
+func WriteResult(n int, err error) (int64, error) {
+	return int64(n), err
+}

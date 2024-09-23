@@ -8,8 +8,13 @@ func (t *Tree) HTable() (tb Table) {
 		ri     int
 	)
 
-	for t != nil {
-		firsts, t = PopFirsts(t)
+	if t.IsLeaf() {
+		return
+	}
+
+	dot := t.Children[0]
+	for dot != nil {
+		firsts, dot = FirstsOf(dot)
 		var (
 			endCell = firsts[len(firsts)-1]
 			row     = make([]*Cell, len(firsts)+maxDepth-endCell.depth)
@@ -27,27 +32,18 @@ func (t *Tree) HTable() (tb Table) {
 
 		tb = append(tb, row)
 	}
+
 	return
 }
 
-func PopFirsts(t *Tree) (firsts []*Tree, dot *Tree) {
-	dot = popFirsts(t, &firsts)
-	return
-}
-
-func popFirsts(t *Tree, firsts *[]*Tree) (dot *Tree) {
-	if t.parent != nil {
-		*firsts = append(*firsts, t)
-	}
-
-	if len(t.Children) > 0 {
-		dot = popFirsts(t.Children[0], firsts)
-	} else {
-		dot = Next(t)
-		t.parent.Children = t.parent.Children[1:]
-		for _, child := range t.parent.Children {
-			child.index--
+func FirstsOf(t *Tree) (firsts []*Tree, dot *Tree) {
+	dot = t
+	for !dot.IsLeaf() {
+		firsts = append(firsts, dot)
+		if dot = Next(dot); dot == nil {
+			return
 		}
 	}
-	return
+	firsts = append(firsts, dot)
+	return firsts, Next(dot)
 }

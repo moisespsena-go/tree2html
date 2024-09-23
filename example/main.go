@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"strconv"
 	"strings"
@@ -8,10 +9,12 @@ import (
 	"github.com/moisespsena-go/tree2html"
 )
 
-var New = tree2html.New
+func Node(child ...*tree2html.Tree) *tree2html.Tree {
+	return tree2html.Node(nil, child...)
+}
 
 func main() {
-	f, err := os.Create("example.html")
+	f, err := os.Create("example/example.html")
 	if err != nil {
 		panic(err)
 	}
@@ -19,46 +22,43 @@ func main() {
 
 	f.WriteString("<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"></head><body><h1>Example</h1>")
 
-	write(f, New("",
-		New(""),
-		New(""),
-	).Build())
+	write(f, tree2html.New(
+		Node(),
+		Node(),
+	))
+
+	write(f, tree2html.New(
+		Node(
+			Node(
+				Node(
+					Node(
+						Node(
+							Node(Node(Node(Node()))),
+							Node(),
+						),
+					),
+				),
+			),
+		),
+	))
 
 	write(f,
-		New("",
-			New("",
-				New("",
-					New(""),
-					New("",
-						New(""),
-						New(""),
-						New("",
-							New("", New("", New(""))),
-							New(""),
-						),
-						New(""),
-					),
-					New(""),
-				),
-				New("",
-					New(""),
-					New(""),
-				),
+		tree2html.New(
+			Node(
+				Node(),
 			),
-			New("",
-				New(""),
-				New("",
-					New(""),
-					New(""),
-					New("",
-						New("", New("", New(""))),
-						New(""),
+			Node(
+				Node(),
+				Node(
+					Node(
+						Node(Node(Node())),
+						Node(),
 					),
-					New(""),
+					Node(),
 				),
-				New(""),
+				Node(),
 			),
-		).Build())
+		))
 
 	f.WriteString("</body></html>")
 }
@@ -70,8 +70,15 @@ func write(f *os.File, tree *tree2html.Tree) {
 	})
 
 	// Vertical
+	f.WriteString("<p>The Tree:</p>\n<pre>")
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	enc.Encode(tree.Children)
+	f.WriteString("</pre>\n")
+
+	// Vertical
 	f.WriteString("<p>Vertical</p>\n")
-	f.WriteString("<table border=\"1\"><tbody>\n")
+	f.WriteString(`<table style="text-align:center" border="1"><tbody>` + "\n")
 	tree.VTable().WriteTo(f)
 	f.WriteString("</tbody></table>\n")
 

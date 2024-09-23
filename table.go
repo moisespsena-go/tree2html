@@ -27,11 +27,12 @@ func (r Row) WriteTo(w io.Writer) (n int64, err error) {
 }
 
 func (r Row) Write(w Writer) (n int64, err error) {
-	var n2 int64
+	var (
+		n2  int64
+		end func() (int64, error)
+	)
 
-	n2, err = w.OpenRow()
-	n += n2
-	if err != nil {
+	if end, n, err = w.Row(); err != nil {
 		return
 	}
 
@@ -43,7 +44,7 @@ func (r Row) Write(w Writer) (n int64, err error) {
 		}
 	}
 
-	n2, err = w.CloseRow()
+	n2, err = end()
 	n += n2
 	return
 }

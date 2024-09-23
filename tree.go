@@ -3,14 +3,18 @@ package tree2html
 type Tree struct {
 	parent    *Tree
 	index     int
-	Value     any
-	Children  []*Tree
 	leafCount int
 	depth     int
+	Value     any     `json:"Value,omitempty"`
+	Children  []*Tree `json:"Children,omitempty"`
 }
 
-func New(val any, children ...*Tree) *Tree {
+func Node(val any, children ...*Tree) *Tree {
 	return &Tree{Value: val, Children: children}
+}
+
+func New(children ...*Tree) *Tree {
+	return Node(nil, children...).Build()
 }
 
 func (t *Tree) Parent() *Tree {
@@ -26,6 +30,14 @@ func (t *Tree) Root() *Tree {
 
 func (t *Tree) Index() int {
 	return t.index
+}
+
+func (t *Tree) Depth() int {
+	return t.depth
+}
+
+func (t *Tree) IsLeaf() bool {
+	return len(t.Children) == 0
 }
 
 func (t Tree) DeepCopy() *Tree {
@@ -52,12 +64,27 @@ func (t *Tree) walk(p []*Tree, f func(path []*Tree, t *Tree, i int)) {
 	}
 }
 
-func (t *Tree) Build() *Tree {
-	t.Walk(func(p []*Tree, t *Tree, i int) {
-		t.index = i
-		t.parent = p[len(p)-1]
-		t.depth = len(p)
-		t.leafCount = LeafCount(t)
-	})
+func (t *Tree) Append(child ...*Tree) *Tree {
+	t.Children = append(t.Children, child...)
 	return t
+}
+
+func (t *Tree) Build() *Tree {
+	t.build(0)
+	return t
+}
+
+func (t *Tree) build(depth int) {
+	t.depth = depth
+
+	for i, child := range t.Children {
+		child.index = i
+		child.parent = t
+		child.build(depth + 1)
+		if child.IsLeaf() {
+			t.leafCount++
+		} else {
+			t.leafCount += child.leafCount
+		}
+	}
 }
